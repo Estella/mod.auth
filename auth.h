@@ -25,6 +25,7 @@
 #include	<string>
 
 #include	"client.h"
+#include	"Network.h"
 
 namespace gnuworld
 {
@@ -40,7 +41,7 @@ public:
 	/**
 	 * Constructor receives a configuration file name.
 	 */
-	auth( const std::string& ) ;
+	auth( const std::string& configFileName ) ;
 
 	/**
 	 * Destructor does normal stuff.
@@ -84,7 +85,7 @@ protected:
 	/**
 	 * Whether or not to restrict the service to opers only.
 	 */
-	bool		opersOnly ;
+	bool		operOnly ;
 
 	/**
 	 * Whether or not to require the use of the secure message type.

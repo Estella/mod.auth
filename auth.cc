@@ -54,12 +54,12 @@ auth::auth( const std::string& configFileName )
  : xClient( configFileName )
 {
 /* Load the config file */
-EConfig authConfig(confFileName);
+EConfig authConfig(configFileName);
 
 /* Load any settings we have */
-maxAccountLen = ::atoi(authConfig.Require("maxAccounLen")->second.c_str());
-operOnly = ::atoi(authConfig->Require("operOnly")->second.c_str());
-secureOnly = ::atoi(authConfig->Require("secureOnly")->second.c_str());
+maxAccountLen = ::atoi(authConfig.Require("maxAccountLen")->second.c_str());
+operOnly = ::atoi(authConfig.Require("operOnly")->second.c_str());
+secureOnly = ::atoi(authConfig.Require("secureOnly")->second.c_str());
 }
 
 auth::~auth()
@@ -91,9 +91,9 @@ if (!validAccount(account)) {
   Notice(theClient, "%s is not a valid account name.", account.c_str());
   return;
 }
+iClient* receiver = NULL;
 if (st.size() > 1) {
-  iClient* receiver = Network->findNick(st[1]);
-  if (!receiver) {
+  if (!(receiver = Network->findNick(st[1]))) {
     Notice(theClient, "Unable to find nickname %s", st[1].c_str());
     return;
   }
@@ -124,7 +124,7 @@ void auth::BurstChannels()
 xClient::BurstChannels();
 }
 
-bool auth::validAccount(const string& account) const
+bool auth::validAccount(const std::string& account) const
 {
 if (account.empty() || account.size() > maxAccountLen )
   return false;
@@ -138,7 +138,7 @@ if (account.empty() || account.size() > maxAccountLen )
 if (isdigit(account[0]))
   return false;
 
-for ( string::const_iterator sItr = account.begin();
+for ( std::string::const_iterator sItr = account.begin();
      sItr != account.end() ; ++sItr ) {
   if ( *sItr >= 'A' && *sItr <= '}' )
     // ok
