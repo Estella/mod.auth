@@ -1,0 +1,34 @@
+# $Id$
+# mod.auth configuration file
+
+# ---------------------------------------------------------------------
+
+# Nickname of bot
+nickname = AUTH
+
+# Username of bot
+username = auth
+
+# Hostname of bot
+hostname = evilnet.development
+
+# Real name (info) of bot
+userdescription = Stand-alone Authentication Service
+
+# User modes bot should set
+mode = +idk
+
+# ---------------------------------------------------------------------
+# Miscellaneous settings
+
+# Valid account length (default on IRCu: 12)
+maxAccountLen = 12
+
+# Is this service restricted to opers only?
+operOnly = 1
+
+# Are users of this service required to use the secure message format?
+secureOnly = 1
+
+# End of config file.
+# ---------------------------------------------------------------------

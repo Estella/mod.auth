@@ -3,8 +3,12 @@
 
 lib_LTLIBRARIES = libauth.la
 libauth_la_SOURCES = auth.cc
-libauth_la_CXXFLAGS = -I${top_srcdir}/include \
-	-I${top_srcdir}/libgnuworld
 libauth_la_LDFLAGS = -module -export-dynamic
 
-EXTRA_DIST = auth.h
+EXTRA_DIST = auth.h \
+	auth.example.conf.in \
+	$(COMMAND_CONF)
+
+confdir=${prefix}/bin
+conf_DATA = auth.example.conf \
+	$(COMMAND_CONF)

@@ -62,9 +62,34 @@ public:
 	 * is established.  The purpose of this method is to inform
 	 * the xServer of the channels this client wishes to burst.
 	 */
-	virtual void BurstChannels() ;
+	virtual void BurstChannels();
 
 protected:
+
+        /**
+         * Return true if the given string represents a valid
+         * account.  This is rather trivial, and probably not
+         * entirely correct, but hopefully it will avoid some
+         * simple typos and types of abuse.
+         */
+	bool	validAccount( const std::string& ) const ;
+
+        /**
+         * The maximum account length for the network on which this
+         * client runs.  This is used in determining if an account
+         * is valid.
+         */
+	size_t		maxAccountLen ;
+
+	/**
+	 * Whether or not to restrict the service to opers only.
+	 */
+	bool		opersOnly ;
+
+	/**
+	 * Whether or not to require the use of the secure message type.
+	 */
+	bool		secureOnly ;
 
 } ;
 

@@ -52,7 +52,15 @@ extern "C"
  */
 auth::auth( const std::string& configFileName )
  : xClient( configFileName )
-{}
+{
+/* Load the config file */
+EConfig authConfig(confFileName);
+
+/* Load any settings we have */
+maxAccountLen = ::atoi(authConfig.Require("maxAccounLen")->second.c_str());
+operOnly = ::atoi(authConfig->Require("operOnly")->second.c_str());
+secureOnly = ::atoi(authConfig->Require("secureOnly")->second.c_str());
+}
 
 auth::~auth()
 {
@@ -62,41 +70,89 @@ auth::~auth()
 void auth::OnPrivateMessage( iClient* theClient,
 	const std::string& Message, bool secure)
 {
-if(!theClient->isOper()) {
-  //if the client is not oper'd we act as the clientExample ;)
-  Notice( theClient, "Howdy :)" ) ;
+if (operOnly && !theClient->isOper()) {
+  // if the client is not oper'd we act as the clientExample ;)
+  Notice(theClient, "You must be an IRC Operator to use this service.");
   return;
 }
 
-if(!secure) {
-  Notice(theClient, "You must /msg %s@%s", nickName.c_str(), getUplinkName().c_str());
-  return ;
+if (secureOnly && !secure) {
+  Notice(theClient, "You must /msg %s@%s", nickName.c_str(),
+	 getUplinkName().c_str());
+  return;
 }
 
+StringTokenizer st(Message);
+if (st.empty())
+  return;
 
-StringTokenizer st( Message ) ;
-if( st.empty() ) {
- return ;
+std::string account(st[0]);
+if (!validAccount(account)) {
+  Notice(theClient, "%s is not a valid account name.", account.c_str());
+  return;
 }
-
-string command( string_upper( st[ 0 ] ) ) ;
-
-if(command == "AUTH") {
-  if(st.size() < 1) {
-    Notice( theClient, "Usage: AUTH <account>" );
+if (st.size() > 1) {
+  iClient* receiver = Network->findNick(st[1]);
+  if (!receiver) {
+    Notice(theClient, "Unable to find nickname %s", st[1].c_str());
     return;
   }
-
-  if(!theClient->isModeR()) {
-    theClient->setAccount( st[1] );
-  }
 }
+
+if (!theClient->isModeR()) {
+  if (receiver) {
+    MyUplink->UserLogin(receiver, account, this);
+    Notice(theClient, "%s is now authenticated as %s.",
+	   receiver->getNickName().c_str(), account.c_str());
+    Notice(receiver, "You have been authenticated as %s by %s.",
+	   account.c_str(), theClient->getNickName().c_str());
+  } else {
+    MyUplink->UserLogin(theClient, account, this);
+    Notice(theClient, "You are now authenticated as %s.",
+	   account.c_str());
+  }    
+} else {
+  Notice(theClient, "You are already authenticated as %s!",
+	 theClient->getAccount().c_str());
+}
+
 }
 
 // Burst any channels.
 void auth::BurstChannels()
 {
-xClient::BurstChannels() ;
+xClient::BurstChannels();
+}
+
+bool auth::validAccount(const string& account) const
+{
+if (account.empty() || account.size() > maxAccountLen )
+  return false;
+
+/*
+ * From IRCu:
+ * Nickname characters are in range 'A'..'}', '_', '-', '0'..'9'
+ *  anything outside the above set will terminate nickname.
+ * In addition, the first character cannot be '-' or a Digit.
+ */
+if (isdigit(account[0]))
+  return false;
+
+for ( string::const_iterator sItr = account.begin();
+     sItr != account.end() ; ++sItr ) {
+  if ( *sItr >= 'A' && *sItr <= '}' )
+    // ok
+    continue;
+  if ( '_' == *sItr || '-' == *sItr )
+    // ok
+    continue;
+  if ( *sItr >= '0' && *sItr <= '9' )
+    // ok
+    continue;
+  // bad char
+  return false;
+}
+return true;
 }
 
 } // namespace gnuworld
